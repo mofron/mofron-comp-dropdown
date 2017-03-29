@@ -11,20 +11,6 @@ require('mofron-event-common');
  * @brief DropDown Component class
  */
 mofron.comp.DropDown = class extends mofron.comp.Form {
-    
-    addChild (comp, disp) {
-        try {
-            if (false === mofron.func.isInclude(comp, 'Text')) {
-                throw new Error('invalid parameter');
-            }
-            comp.target().tag('option');
-            super.addChild(comp, disp);
-        } catch (e) {
-            console.error(e.stack);
-            throw e;
-        }
-    }
-    
     /**
      * initialize DOM contents
      * 
@@ -38,27 +24,39 @@ mofron.comp.DropDown = class extends mofron.comp.Form {
             );
             
             if ( (null !== prm) && (undefined !== prm[0]) ) {
+                var set_chd = null;
                 for (var idx in prm) {
                     if ('string' === typeof prm[idx]) {
-                        this.addChild(new mofron.comp.Text(prm[idx]));
+                        set_chd = new mofron.comp.Text(prm[idx]);
                     } else if (true === mofron.func.isInclude(prm[idx], 'Component')) {
-                        this.addChild(prm[idx]);
+                        set_chd = prm[idx];
                     } else {
                         throw new Error('invalid parameter');
                     }
+                    set_chd.target().tag('option');
+                    this.addChild(set_chd);
                 }
             } else {
                 throw new Error('invalid paramter');
             }
             
-            if (null !== this.changeEvent()) {
-                this.addEvent(
-                    new mofron.event.Common({
-                        param     : new mofron.Param(this.chgangeEvent(), this),
-                        eventName : 'onchange'
-                    })
-                );
-            }
+            var evt_fnc = function (dd_obj) {
+                              try {
+                                  var chg_evt = dd_obj.changeEvent();
+                                  if (null !== chg_evt) {
+                                      chg_evt(dd_obj);
+                                  }
+                              } catch (e) {
+                                  console.error(e.stack);
+                                  throw e;
+                              }
+                          };
+            this.addEvent(
+                new mofron.event.Common({
+                    handler   : new mofron.Param(evt_fnc,this),
+                    eventName : 'onchange'
+                })
+            );
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -89,10 +87,30 @@ mofron.comp.DropDown = class extends mofron.comp.Form {
                 return [this.style('height'), this.style('width')];
             }
             /* setter */
-            this.style({
-                'height' : ('number' === typeof hei) ? (hei + 'px') : hei,
-                'width'  : ('number' === typeof wid) ? (wid + 'px') : wid
-            });
+            var height = ('number' === typeof hei) ? (hei + 'px') : hei;
+            var fontsz = ('number' === typeof hei) ? (hei - 10)   : hei;
+            var width  = ('number' === typeof wid) ? (wid + 'px') : wid;
+            if (undefined !== height) {
+                this.style({'height' : height});
+            }
+            if (undefined !== width) {
+                this.style({'width'  : width});
+            }
+            
+            var chd = this.child();
+            for (var idx in chd) {
+                if (undefined !== fontsz) {
+                    if ( ('number' === typeof fontsz) && (5 > fontsz) ) {
+                        fontsz = 5;
+                    }
+                    chd[idx].style({
+                        'font-size' : ('number' === typeof fontsz) ? fontsz + 'px' : fontsz
+                    });
+                }
+                if (undefined !== width) {
+                    chd[idx].style({'width'  : width});
+                }
+            }
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -105,7 +123,9 @@ mofron.comp.DropDown = class extends mofron.comp.Form {
                 /* getter */
                 var ret_val = new Array();
                 for (var loop=0; loop < this.child().length ;loop++) {
-                    ret_val.push(this.isSelect(loop));
+                    if (true === this.isSelect(loop)) {
+                        return loop;
+                    }
                 }
                 return ret_val;
             }
@@ -143,32 +163,6 @@ mofron.comp.DropDown = class extends mofron.comp.Form {
     value () {
         try {
             return this.select();
-        } catch (e) {
-            console.error(e.stack);
-            throw e;
-        }
-    }
-    
-    getOptionTag () {
-        try {
-            return class extends mofron.Component {
-                initDomConts (prm) {
-                    try {
-                        this.name('DropDown');
-                        this.vdom().addChild(
-                            new mofron.Dom('option', this)
-                        );
-                              
-                        if (null === prm) {
-                            throw new Error('invalid parameter');
-                        }
-                        this.addChild(prm);
-                    } catch (e) {
-                        console.error(e.stack);
-                        throw e;
-                    }
-                }
-            }
         } catch (e) {
             console.error(e.stack);
             throw e;
