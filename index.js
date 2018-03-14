@@ -2,15 +2,33 @@
  * @file dropdown.js
  * @author simpart
  */
-require('mofron-comp-text');
-require('mofron-comp-form');
-require('mofron-event-common');
+let mf       = require('mofron');
+let Text     = require('mofron-comp-text');
+let FormItem = require('mofron-comp-formitem');
+let eCom     = require('mofron-event-common');
 
 /**
  * @class mofron.comp.DropDown
  * @brief DropDown Component class
  */
-mofron.comp.DropDown = class extends mofron.comp.Form {
+mf.comp.DropDown = class extends FormItem {
+    
+    /**
+     * initialize inputtext component
+     * 
+     * @param po : (array) contents
+     * @param po : (object) option
+     */
+    constructor (po) {
+        try {
+            super();
+            this.name('DropDown');
+            this.prmOpt(po);
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
     /**
      * initialize DOM contents
      * 
@@ -18,42 +36,38 @@ mofron.comp.DropDown = class extends mofron.comp.Form {
      */
     initDomConts (prm) {
         try {
-            this.name('DropDown');
-            this.vdom().addChild(
-                new mofron.Dom('select',this)
-            );
+            super.initDomConts();
+            let sel = new mf.Dom('select',this);
+            this.target().addChild(sel);
+            this.target(sel);
+            this.styleTgt(sel);
             
-            if ( (null !== prm) && (undefined !== prm[0]) ) {
-                var set_chd = null;
-                for (var idx in prm) {
-                    if ('string' === typeof prm[idx]) {
-                        set_chd = new mofron.comp.Text(prm[idx]);
-                    } else if (true === mofron.func.isInclude(prm[idx], 'Component')) {
-                        set_chd = prm[idx];
+            if (undefined != prm) {
+                for (let pidx in prm) {
+                    if ('string' === typeof prm[pidx]) {
+                        this.addChild(new Text(prm[pidx]));
+                    }else if (true === mf.func.isInclude(prm[pidx], 'Component')) {
+                        this.addChild(prm[pidx]);
                     } else {
                         throw new Error('invalid parameter');
                     }
-                    set_chd.target().tag('option');
-                    this.addChild(set_chd);
                 }
-            } else {
-                throw new Error('invalid paramter');
             }
             
-            var evt_fnc = function (dd_obj) {
-                              try {
-                                  var chg_evt = dd_obj.changeEvent();
-                                  if (null !== chg_evt) {
-                                      chg_evt(dd_obj);
-                                  }
-                              } catch (e) {
-                                  console.error(e.stack);
-                                  throw e;
-                              }
-                          };
+            let evt_fnc = (dd_obj) => {
+                try {
+                    let chg_evt = dd_obj.changeEvent();
+                    if (null !== chg_evt) {
+                        chg_evt(dd_obj);
+                    }
+                } catch (e) {
+                    console.error(e.stack);
+                    throw e;
+                }
+            };
             this.addEvent(
-                new mofron.event.Common({
-                    handler   : new mofron.Param(evt_fnc,this),
+                new eCom({
+                    handler   : new mf.Param(evt_fnc, this),
                     eventName : 'onchange'
                 })
             );
@@ -63,54 +77,38 @@ mofron.comp.DropDown = class extends mofron.comp.Form {
         }
     }
     
-    changeEvent (fnc) {
+    addChild (chd, idx) {
         try {
-            if (undefined === fnc) {
-                /* getter */
-                return (undefined === this.m_chgevt) ? null : this.m_chgevt;
+            if (null !== this.height()) {
+                if (true === mf.func.isInclude(chd, 'Text')) {
+                    chd.size(this.height());
+                }
             }
-            /* setter */
-            if ('function' !== typeof fnc) {
-                throw new Error('invalid parameter');
+            if (0 !== this.child().length) {
+                chd.target().tag('option');
             }
-            this.m_chgevt = fnc;
+            super.addChild(chd, idx);
         } catch (e) {
             console.error(e.stack);
             throw e;
         }
     }
     
-    size (hei, wid) {
+    size (x, y) {
         try {
-            if ((undefined === hei) && (undefined === wid)) {
-                /* getter */
-                return [this.style('height'), this.style('width')];
-            }
-            /* setter */
-            var height = ('number' === typeof hei) ? (hei + 'px') : hei;
-            var fontsz = ('number' === typeof hei) ? (hei - 10)   : hei;
-            var width  = ('number' === typeof wid) ? (wid + 'px') : wid;
-            if (undefined !== height) {
-                this.style({'height' : height});
-            }
-            if (undefined !== width) {
-                this.style({'width'  : width});
-            }
-            
-            var chd = this.child();
-            for (var idx in chd) {
-                if (undefined !== fontsz) {
-                    if ( ('number' === typeof fontsz) && (5 > fontsz) ) {
-                        fontsz = 5;
+            let ret = super.size(x, y);
+            if (undefined !== y) {
+                /* setter */
+                let chd = this.child();
+                for (let idx in chd) {
+                    if (true === mf.func.isInclude(chd[idx], 'Text')) {
+                        chd[idx].size(y);
+                    } else {
+                        chd[idx].height(y);
                     }
-                    chd[idx].style({
-                        'font-size' : ('number' === typeof fontsz) ? fontsz + 'px' : fontsz
-                    });
-                }
-                if (undefined !== width) {
-                    chd[idx].style({'width'  : width});
                 }
             }
+            return ret;
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -169,5 +167,5 @@ mofron.comp.DropDown = class extends mofron.comp.Form {
         }
     }
 }
-mofron.comp.dropdown = {};
 module.exports = mofron.comp.DropDown;
+/* end of file */
