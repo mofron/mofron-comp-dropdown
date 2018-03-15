@@ -58,7 +58,9 @@ mf.comp.DropDown = class extends FormItem {
                 try {
                     let chg_evt = dd_obj.changeEvent();
                     if (null !== chg_evt) {
-                        chg_evt(dd_obj);
+                        for (let eidx in chg_evt) {
+                            chg_evt[eidx][0](dd_obj, chg_evt[eidx][1]);
+                        }
                     }
                 } catch (e) {
                     console.error(e.stack);
