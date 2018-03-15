@@ -130,7 +130,7 @@ mf.comp.DropDown = class extends FormItem {
                 return ret_val;
             }
             /* setter */
-            this.vdom();
+            this.adom();
             var chd = this.child();
             if (undefined === chd[idx]) {
                 throw new Error('invalid parameter');
@@ -139,6 +139,13 @@ mf.comp.DropDown = class extends FormItem {
                 chd[idx].target().attr('selected', null);
             } else {
                 chd[idx].target().prop('selected', true);
+            }
+            /* execute change event */
+            let chg_evt = this.changeEvent();
+            if (null !== chg_evt) {
+                for (let eidx in chg_evt) {
+                    chg_evt[eidx][0](this, chg_evt[eidx][1]);
+                }
             }
         } catch (e) {
             console.error(e.stack);
@@ -163,6 +170,26 @@ mf.comp.DropDown = class extends FormItem {
     value () {
         try {
             return this.select();
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+    
+    color (prm) {
+        try {
+            let ret = super.color(prm);
+            if (undefined === ret) {
+                /* setter */
+                let rgb = prm.rgba();
+                rgb[0] = (0 > (rgb[0]-30)) ? 0 : rgb[0]-30;
+                rgb[1] = (0 > (rgb[1]-30)) ? 0 : rgb[1]-30;
+                rgb[2] = (0 > (rgb[2]-30)) ? 0 : rgb[2]-30;
+                this.style({
+                    'border-color' : new mf.Color(rgb[0], rgb[1], rgb[2]).getStyle()
+                });
+            }
+            return ret;
         } catch (e) {
             console.error(e.stack);
             throw e;
