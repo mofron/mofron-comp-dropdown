@@ -135,11 +135,9 @@ mf.comp.DropDown = class extends FormItem {
             if (undefined === chd[idx]) {
                 throw new Error('invalid parameter');
             }
-            if (false === this.vdom().isPushed()) {
-                chd[idx].target().attr('selected', null);
-            } else {
-                chd[idx].target().prop('selected', true);
-            }
+            
+            chd[idx+1].target().attr('selected', "");
+            
             /* execute change event */
             let chg_evt = this.changeEvent();
             if (null !== chg_evt) {
