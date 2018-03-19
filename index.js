@@ -132,7 +132,10 @@ mf.comp.DropDown = class extends FormItem {
             /* setter */
             this.adom();
             var chd = this.child();
-            if (undefined === chd[idx]) {
+            if ('string' === typeof idx) {
+                idx = parseInt(idx);
+            }
+            if (undefined === chd[idx+1]) {
                 throw new Error('invalid parameter');
             }
             
@@ -154,10 +157,14 @@ mf.comp.DropDown = class extends FormItem {
     isSelect (idx) {
         try {
             var chd = this.child();
-            if (undefined === chd[idx]) {
+            if ('string' === typeof idx) {
+                idx = parseInt(idx);
+            }
+            
+            if (undefined === chd[idx+1]) {
                 throw new Error('invalid parameter');
             }
-            var ret_val = chd[idx].target().prop('selected');
+            var ret_val = chd[idx+1].target().prop('selected');
             return (null === ret_val) ? false : ret_val;
         } catch (e) {
             console.error(e.stack);
