@@ -19,11 +19,11 @@ mf.comp.DropDown = class extends FormItem {
      * @param po : (array) contents
      * @param po : (object) option
      */
-    constructor (po) {
+    constructor (po, lst, idx) {
         try {
             super();
             this.name('DropDown');
-            this.prmOpt(po);
+            this.prmOpt(po, lst, idx);
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -34,26 +34,20 @@ mf.comp.DropDown = class extends FormItem {
      * 
      * @param prm (object) : Date object
      */
-    initDomConts (prm) {
+    initDomConts (lbl, lst, idx) {
         try {
-            super.initDomConts();
+            super.initDomConts(lbl);
             let sel = new mf.Dom('select',this);
             this.target().addChild(sel);
             this.target(sel);
-            this.styleTgt(sel);
             
-            if (undefined != prm) {
-                for (let pidx in prm) {
-                    if ('string' === typeof prm[pidx]) {
-                        this.addChild(new Text(prm[pidx]));
-                    }else if (true === mf.func.isInclude(prm[pidx], 'Component')) {
-                        this.addChild(prm[pidx]);
-                    } else {
-                        throw new Error('invalid parameter');
-                    }
-                }
+            /* set default */
+            if (undefined !== lst) { 
+                this.addList(lst);
+                this.select((undefined === idx) ? 0 : idx);
             }
             
+            /* init change event */
             let evt_fnc = (dd_obj) => {
                 try {
                     let chg_evt = dd_obj.changeEvent();
@@ -139,7 +133,18 @@ mf.comp.DropDown = class extends FormItem {
                 throw new Error('invalid parameter');
             }
             
-            chd[idx+1].target().attr('selected', "");
+            /* clear selected */
+            for (let cidx in chd) {
+                if (0 == cidx) {
+                    continue;
+                }
+                chd[cidx].target().attr('selected', null);
+            }
+            if (true === this.target().isPushed()) {
+                this.target().getRawDom().selectedIndex = idx;
+            } else {
+                chd[idx+1].target().attr('selected', "");
+            }
             
             /* execute change event */
             let chg_evt = this.changeEvent();
@@ -172,9 +177,34 @@ mf.comp.DropDown = class extends FormItem {
         }
     }
     
-    value () {
+    value (prm) {
         try {
-            return this.select();
+            if (undefined === prm) {
+                /* getter */
+                return this.select();
+            }
+            /* setter */
+            this.select(prm);
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+    
+    addList (prm) {
+        try {
+            if (true !== Array.isArray(prm)) {
+                throw new Error('invalid parameter');
+            }
+            for (let pidx in prm) {
+                if ('string' === typeof prm[pidx]) {
+                    this.addChild(new Text(prm[pidx]));
+                }else if (true === mf.func.isInclude(prm[pidx], 'Component')) {
+                    this.addChild(prm[pidx]);
+                } else {
+                    throw new Error('invalid parameter');
+                }
+            }
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -195,6 +225,15 @@ mf.comp.DropDown = class extends FormItem {
                 });
             }
             return ret;
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+    
+    clear () {
+        try {
+            this.select(0);
         } catch (e) {
             console.error(e.stack);
             throw e;
