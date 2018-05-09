@@ -40,6 +40,7 @@ mf.comp.DropDown = class extends FormItem {
             let sel = new mf.Dom('select',this);
             this.target().addChild(sel);
             this.target(sel);
+            this.styleTgt(sel);
             
             /* set default */
             if (undefined !== lst) { 
