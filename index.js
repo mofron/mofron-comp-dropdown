@@ -170,8 +170,13 @@ mf.comp.DropDown = class extends FormItem {
             if (undefined === chd[idx+1]) {
                 throw new Error('invalid parameter');
             }
-            var ret_val = chd[idx+1].target().prop('selected');
-            return (null === ret_val) ? false : ret_val;
+            
+            if (true === this.target().isPushed()) {
+                return (this.target().getRawDom().selectedIndex === idx) ? true : false;
+            } else {
+                var ret_val = chd[idx+1].target().prop('selected');
+                return (null === ret_val) ? false : ret_val;
+            }
         } catch (e) {
             console.error(e.stack);
             throw e;
