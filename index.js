@@ -74,14 +74,35 @@ mf.comp.DropDown = class extends FormItem {
         }
     }
     
-    addChild (chd, idx) {
+    afterRender () {
         try {
+            super.afterRender();
+            let chd = this.child();
+            for (let cidx in chd) {
+                if (null !== chd[cidx].target().attr('selected')) {
+                    this.target().getRawDom().selectedIndex = parseInt(cidx);
+                    break;
+                }
+            }
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+    
+    addChild (chd, idx, flg) {
+        try {
+            if (false === flg) {
+                super.addChild(chd, idx);
+                return;
+            }
+            
             if (null !== this.height()) {
                 if (true === mf.func.isInclude(chd, 'Text')) {
                     chd.size(this.height());
                 }
             }
-            if (0 !== this.child().length) {
+            if (0 !== this.getChild(true).length) {
                 chd.target().tag('option');
             }
             super.addChild(chd, idx);
@@ -96,6 +117,7 @@ mf.comp.DropDown = class extends FormItem {
             let ret = super.size(x, y);
             if (undefined !== y) {
                 /* setter */
+                this.label().size(y);
                 let chd = this.child();
                 for (let idx in chd) {
                     if (true === mf.func.isInclude(chd[idx], 'Text')) {
@@ -126,25 +148,22 @@ mf.comp.DropDown = class extends FormItem {
             }
             /* setter */
             this.adom();
-            var chd = this.child();
             if ('string' === typeof idx) {
                 idx = parseInt(idx);
             }
-            if (undefined === chd[idx+1]) {
+            let chd = this.child();
+            if (undefined === chd[idx]) {
                 throw new Error('invalid parameter');
             }
             
             /* clear selected */
             for (let cidx in chd) {
-                if (0 == cidx) {
-                    continue;
-                }
                 chd[cidx].target().attr('selected', null);
             }
             if (true === this.target().isPushed()) {
                 this.target().getRawDom().selectedIndex = idx;
             } else {
-                chd[idx+1].target().attr('selected', "");
+                chd[idx].target().attr('selected', "");
             }
             
             /* execute change event */
@@ -167,14 +186,14 @@ mf.comp.DropDown = class extends FormItem {
                 idx = parseInt(idx);
             }
             
-            if (undefined === chd[idx+1]) {
+            if (undefined === chd[idx]) {
                 throw new Error('invalid parameter');
             }
             
             if (true === this.target().isPushed()) {
                 return (this.target().getRawDom().selectedIndex === idx) ? true : false;
             } else {
-                var ret_val = chd[idx+1].target().prop('selected');
+                var ret_val = chd[idx].target().prop('selected');
                 return (null === ret_val) ? false : ret_val;
             }
         } catch (e) {
@@ -186,7 +205,7 @@ mf.comp.DropDown = class extends FormItem {
     value (prm) {
         try {
             if (undefined === prm) {
-                /* getter */
+                /* getter*/
                 return this.select();
             }
             /* setter */
