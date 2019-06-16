@@ -1,15 +1,15 @@
 {
   "name": "mofron-comp-dropdown",
-  "version": "0.2.8",
+  "version": "0.3.0",
   "description": "DropDown Component for mofron",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "mofron-comp-formitem" : "",
     "mofron-comp-text" : "",
-    "mofron-comp-form" : "",
-    "mofron-event-common": ""
+    "mofron-event-oncommon" : ""
   },
   "repository": {
     "type": "git",
