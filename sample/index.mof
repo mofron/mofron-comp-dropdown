@@ -1,0 +1,11 @@
+<require>
+    <tag load="mofron-comp-dropdown">DropDown</tag>
+</require>
+
+<script run=init>
+let chg_evt = (p1,p2,p3) => { console.log(p2); }
+</script>
+
+<DropDown changeEvent=@chg_evt size=(1rem,0.5rem) select=1>
+[select_1,select_2,select_3]
+</DropDown>

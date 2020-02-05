@@ -1,27 +1,33 @@
 /**
  * @file   mofron-comp-dropdown/index.js
  * @brief  dropdown component for mofron
- * @author simpart
+ * @license MIT
  */
-const mf       = require("mofron");
 const FormItem = require("mofron-comp-formitem");
 const Text     = require("mofron-comp-text");
-const evCommon = require("mofron-event-oncommon");
+const onCommon = require("mofron-event-oncommon");
+const comutl   = mofron.util.common;
 
-mf.comp.DropDown = class extends FormItem {
-    
+module.exports = class extends FormItem {
     /**
      * initialize dropdown component
      * 
-     * @param 'text' parameter
+     * @param (mixed) 'text' parameter
+     *                key-value: component config
+     * @short text
      * @type private
      */
-    constructor (po) {
+    constructor (prm) {
         try {
             super();
             this.name("DropDown");
-            this.prmMap("text");
-            this.prmOpt(po);
+            this.shortForm("text");
+	    /* init config */
+	    this.confmng().add("select", { type: "number", init: 0 });
+	    /* set config */
+	    if (undefined !== prm) {
+                this.config(prm);
+            }
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -36,23 +42,25 @@ mf.comp.DropDown = class extends FormItem {
     initDomConts () {
         try {
             super.initDomConts();
-            let sel = new mf.Dom("select", this);
-            this.target().addChild(sel);
-            this.target(sel);
+            let sel = new mofron.class.Dom("select", this);
+            this.childDom().child(sel);
+            this.childDom(sel);
             
             /* init change event */
-            let chg_evt = (p1,p2,p3) => {
+            let cevt = (p1,p2,p3) => {
                 try {
-                    let cbx_evt = p1.changeEvent();
-                    for (let cb_idx in cbx_evt) {
-                        cbx_evt[cb_idx][0](p1, p1.select(), cbx_evt[cb_idx][1]);
+                    let chg_evt = p1.changeEvent();
+                    for (let cidx in chg_evt) {
+                        chg_evt[cidx].exec(p1, p1.select());
                     }
                 } catch (e) {
                     console.error(e.stack);
                     throw e;
                 }
             }
-            this.event(new evCommon(chg_evt, "onchange"));
+            this.event(
+	        new onCommon(comutl.getarg(cevt, "onchange"))
+            );
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -62,14 +70,12 @@ mf.comp.DropDown = class extends FormItem {
     /**
      * set select index
      *
-     * @type private 
+     * @type private
      */
-    beforeRender () {
+    afterRender () {
         try {
-            super.beforeRender();
-            if (null !== this.select()) {
-                this.select(this.select());
-            }
+            super.afterRender();
+	    this.select((null === this.select()) ? 0 : this.confmng("select"));
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -77,39 +83,39 @@ mf.comp.DropDown = class extends FormItem {
     }
     
     /**
-     * select text list
+     * select text list setter/getter
      *
-     * @param (string/array) select text contents
-     * @return (array) select text contents
-     * @type tag parameter
+     * @param (mixed) string:  select text contents
+     *                array: select text contents list
+     *                undefined: call as getter
+     * @return (array) select text contents [string,..]
+     *                 null: not set
+     * @type parameter
      */
     text (prm) {
         try {
-            if (undefined === prm) {
+	    if (undefined === prm) {
                 /* getter */
-                let ret = [];
-                let chd = this.target().child();
-                for (let cidx in chd) {
+		let ret = [];
+		let chd = this.childDom().child();
+		for (let cidx in chd) {
                     ret.push(chd[cidx].text);
-                }
-                return (0 === ret.length) ? null : ret;
-            }
-            /* setter */
-            if (true === Array.isArray(prm)) {
-                for (let pidx in prm) {
+		}
+		return (0 === ret.length) ? null : ret;
+	    }
+	    /* setter */
+	    if (true === Array.isArray(prm)) {
+	        for (let pidx in prm) {
                     this.text(prm[pidx]);
-                }
+		}
                 return;
-            }
-            if ("string" === typeof prm) {
-                this.target().addChild(
-                    new mf.Dom({
-                        tag: "option", component: this, text: prm
-                    })
-                );
-            } else {
+	    } else if ("string" === typeof prm) {
+                this.childDom().child(
+		    new mofron.class.Dom({ tag: "option", component: this, text: prm })
+		);
+	    } else {
                 throw new Error("invalid parameter");
-            }
+	    }
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -117,37 +123,39 @@ mf.comp.DropDown = class extends FormItem {
     }
     
     /**
-     * item value
+     * select index setter/getter
      *
      * @param (number) selected index
-     * @return (number) selected index
-     * @type function
+     *                 undefined: call as getter
+     * @return (mixed) number: selected index
+     *                 null: not selected
+     * @type parameter
      */
-    value (prm, flg) {
+    select (prm) {
         try {
-            let opts = this.target().child();
+            let opts = this.childDom().child();
             if (undefined === prm) {
-                if (false === this.adom().isPushed()) {
-                    return this.member("value", "number");
-                }
-                /* getter */
-                for (let oidx in opts) {
-                    if (true === opts[oidx].prop("selected")) {
-                        return parseInt(oidx);
+	        /* getter */
+                if (false === this.isExists()) {
+                    return this.confmng("select");
+		} else {
+                    for (let oidx in opts) {
+                        if (true === opts[oidx].props("selected")) {
+                            return parseInt(oidx);
+                        }
                     }
-                }
+		}
                 return null;
             }
             /* setter */
-            if ( (undefined === opts[prm]) && (true !== flg) ) {
-                if (false === this.adom().isPushed()) {
-                    this.member("value", "number", prm);
-                    return;
-                } else {
+            if (false === this.isExists()) {
+                this.confmng("select", prm);
+	    } else {
+                if (undefined === opts[prm]) {
                     throw new Error("invalid parameter");
-                }
-            }
-            opts[prm].prop("selected", true);
+		}
+		opts[prm].props({ "selected" : true });
+	    }
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -157,12 +165,14 @@ mf.comp.DropDown = class extends FormItem {
     /**
      * item value
      *
-     * @param (number) selected index
-     * @return (number) selected index
-     * @type tag parameter
+     * @param (number) the same as select parameter
+     * @return (mixed) the same as select parameter
+     * @type parameter
      */
-    select (prm) {
-        try { return this.value(prm); } catch (e) {
+    value (prm) {
+        try {
+	    return this.select(prm);
+	} catch (e) {
             console.error(e.stack);
             throw e;
         }
@@ -174,11 +184,12 @@ mf.comp.DropDown = class extends FormItem {
      * @type function
      */
     clear () {
-        try { this.select(0); } catch (e) {
+        try {
+	    this.select(0);
+	} catch (e) {
             console.error(e.stack);
             throw e;
         }
     }
 }
-module.exports = mf.comp.DropDown;
 /* end of file */

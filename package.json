@@ -1,6 +1,6 @@
 {
   "name": "mofron-comp-dropdown",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "description": "DropDown Component for mofron",
   "main": "index.js",
   "scripts": {
@@ -8,20 +8,19 @@
   },
   "dependencies": {
     "mofron-comp-formitem" : "",
-    "mofron-comp-text" : "",
     "mofron-event-oncommon" : ""
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/simpart/mofron-comp-dropdown.git"
+    "url": "git+https://github.com/mofron/mofron-comp-dropdown.git"
   },
   "keywords": [
-    "mofron"
+    "front-end","mofron"
   ],
   "author": "simparts",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/simpart/mofron-comp-dropdown/issues"
+    "url": "https://github.com/mofron/mofron-comp-dropdown/issues"
   },
-  "homepage": "https://github.com/simpart/mofron-comp-dropdown#readme"
+  "homepage": "https://github.com/mofron/mofron-comp-dropdown#readme"
 }
