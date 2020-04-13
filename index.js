@@ -58,9 +58,7 @@ module.exports = class extends FormItem {
                     throw e;
                 }
             }
-            this.event(
-	        new onCommon(comutl.getarg(cevt, "onchange"))
-            );
+            this.event(new onCommon(cevt,"onchange"));
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -70,7 +68,7 @@ module.exports = class extends FormItem {
     /**
      * set select index
      *
-     * @type private
+     * @type private 
      */
     afterRender () {
         try {
