@@ -1,6 +1,6 @@
 {
   "name": "mofron-comp-dropdown",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "DropDown Component for mofron",
   "main": "index.js",
   "scripts": {

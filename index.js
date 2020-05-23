@@ -46,6 +46,14 @@ module.exports = class extends FormItem {
             this.childDom().child(sel);
             this.childDom(sel);
             
+	    let rdom = this.rootDom()[0];
+	    sel.style().listener("width", (w1,w2,w3) => {
+	        rdom.style({ "width" : w2[0] });
+	    });
+	    sel.style().listener("height", (h1,h2,h3) => {
+                rdom.style({ "height" : h2[0] });
+            });
+            
             /* init change event */
             let cevt = (p1,p2,p3) => {
                 try {
@@ -90,30 +98,31 @@ module.exports = class extends FormItem {
      *                 null: not set
      * @type parameter
      */
-    text (prm) {
+    text (prm, cnf) {
         try {
-	    if (undefined === prm) {
+            if (undefined === prm) {
                 /* getter */
-		let ret = [];
-		let chd = this.childDom().child();
-		for (let cidx in chd) {
-                    ret.push(chd[cidx].text);
-		}
-		return (0 === ret.length) ? null : ret;
+		return this.child();
 	    }
 	    /* setter */
-	    if (true === Array.isArray(prm)) {
-	        for (let pidx in prm) {
-                    this.text(prm[pidx]);
-		}
+            if (true === Array.isArray(prm)) {
+                for (let pidx in prm) {
+                    this.text(prm[pidx],cnf);
+                }
                 return;
-	    } else if ("string" === typeof prm) {
-                this.childDom().child(
-		    new mofron.class.Dom({ tag: "option", component: this, text: prm })
-		);
-	    } else {
-                throw new Error("invalid parameter");
 	    }
+            let buf  = this.childDom();
+	    let odom = new mofron.class.Dom("option", this);
+            this.childDom().child(odom);
+            this.childDom(odom);
+	    if ("string" === typeof prm) {
+                prm = new Text(prm);
+	    }
+	    if (undefined !== cnf) {
+                prm.config(cnf);
+	    }
+            this.child(prm);
+            this.childDom(buf);
         } catch (e) {
             console.error(e.stack);
             throw e;
