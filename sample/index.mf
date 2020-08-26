@@ -1,6 +1,6 @@
-<require>
+<setting>
     <tag load="mofron-comp-dropdown">DropDown</tag>
-</require>
+</setting>
 
 <script run=init>
 let chg_evt = (p1,p2,p3) => { console.log(p2); }

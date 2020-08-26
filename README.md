@@ -11,9 +11,9 @@ npm install mofron   mofron-comp-dropdown
 
 # Sample
 ```html
-<require>
+<setting>
     <tag load="mofron-comp-dropdown">DropDown</tag>
-</require>
+</setting>
 
 <script run=init>
 let chg_evt = (p1,p2,p3) => { console.log(p2); }
@@ -28,7 +28,7 @@ let chg_evt = (p1,p2,p3) => { console.log(p2); }
 
 | Short<br>Form | Parameter Name | Type | Description |
 |:-------------:|:---------------|:-----|:------------|
-| ◯  | text | mixed | string:  select text contents |
+| | afterRender | ||| ◯  | text | mixed | string:  select text contents |
 | | | | array: select text contents list |
 | | | | undefined: call as getter |
 | | select | number | selected index |

@@ -20,7 +20,7 @@ module.exports = class extends FormItem {
     constructor (prm) {
         try {
             super();
-            this.name("DropDown");
+            this.modname("DropDown");
             this.shortForm("text");
 	    /* init config */
 	    this.confmng().add("select", { type: "number", init: 0 });
