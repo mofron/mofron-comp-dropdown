@@ -50,9 +50,6 @@ module.exports = class extends FormItem {
 	    sel.style().listener("width", (w1,w2,w3) => {
 	        rdom.style({ "width" : w2[0] });
 	    });
-	    sel.style().listener("height", (h1,h2,h3) => {
-                rdom.style({ "height" : h2[0] });
-            });
             
             /* init change event */
             let cevt = (p1,p2,p3) => {
