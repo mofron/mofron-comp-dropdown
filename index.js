@@ -56,14 +56,14 @@ module.exports = class extends FormItem {
                 try {
                     let chg_evt = p1.changeEvent();
                     for (let cidx in chg_evt) {
-                        chg_evt[cidx].exec(p1, p1.select());
+                        chg_evt[cidx][0](p1, p1.select(), chg_evt[cidx][1]);
                     }
                 } catch (e) {
                     console.error(e.stack);
                     throw e;
                 }
             }
-            this.event(new onCommon(cevt,"onchange"));
+            this.event(new onCommon(cevt,"onchange"), { private:true });
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -78,7 +78,11 @@ module.exports = class extends FormItem {
     afterRender () {
         try {
             super.afterRender();
-	    this.select((null === this.select()) ? 0 : this.confmng("select"));
+            
+            let chg_evt = this.changeEvent();
+	    for (let cidx in chg_evt) {
+                chg_evt[cidx][0](this, this.select(), chg_evt[cidx][1]);
+            }
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -99,7 +103,7 @@ module.exports = class extends FormItem {
         try {
             if (undefined === prm) {
                 /* getter */
-		return this.child();
+		return (0 === this.child().length) ? this.child() : this.child().slice(1);
 	    }
 	    /* setter */
             if (true === Array.isArray(prm)) {
