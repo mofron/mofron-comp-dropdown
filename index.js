@@ -1,199 +1,296 @@
 /**
- * @file   mofron-comp-dropdown/index.js
- * @brief  dropdown component for mofron
+ * @file mofron-comp-dropdown/index.js
+ * @brief dropdown component for mofron
  * @license MIT
  */
-const FormItem = require("mofron-comp-formitem");
-const Text     = require("mofron-comp-text");
-const onCommon = require("mofron-event-oncommon");
+const Text     = require('mofron-comp-text');
+const Frame    = require('mofron-comp-frame');
+const Click    = require('mofron-event-click');
+const Hover    = require('mofron-event-hover');
+const Focus    = require('mofron-event-clkfocus');
+const FadePack = require('mofron-effect-fadepack');
+const Border   = require('mofron-effect-border');
+const ConfArg  = mofron.class.ConfArg;
 const comutl   = mofron.util.common;
 
-module.exports = class extends FormItem {
+module.exports = class extends mofron.class.Component {
     /**
-     * initialize dropdown component
+     * initialize component
      * 
-     * @param (mixed) 'text' parameter
+     * @param (mixed) 
      *                key-value: component config
-     * @short text
+     * @short 
      * @type private
      */
-    constructor (prm) {
+    constructor (p1) {
         try {
             super();
-            this.modname("DropDown");
-            this.shortForm("text");
+            this.modname('dropdown');
+            
 	    /* init config */
-	    this.confmng().add("select", { type: "number", init: 0 });
-	    /* set config */
-	    if (undefined !== prm) {
-                this.config(prm);
+            this.confmng().add('indexArrow',  { type:'array' });
+	    this.confmng().add('frame',       { type:'function' });
+            this.confmng().add('selectEvent', { type:'event', list:true });
+            this.confmng().add('accentColor', { type:'color' });
+            this.m_extend = false;
+            
+	    if (0 < arguments.length) {
+                this.config(p1);
             }
         } catch (e) {
             console.error(e.stack);
             throw e;
         }
     }
-    
-    /**
-     * initialize dom contents
-     * 
-     * @type private
-     */
+
     initDomConts () {
         try {
             super.initDomConts();
-            let sel = new mofron.class.Dom("select", this);
-            this.childDom().child(sel);
-            this.childDom(sel);
             
-	    let rdom = this.rootDom()[0];
-	    sel.style().listener("width", (w1,w2,w3) => {
-	        rdom.style({ "width" : w2[0] });
+	    this.indexArrow([
+                new Text({ text:'&#9660;', style: { 'margin-left':'0.2rem' }, size:'0.14rem' }),
+		new Text({ text:'&#9650;', style: { 'margin-left':'0.2rem' }, size:'0.14rem', visible:false })
+	    ]);
+	    this.indexFrame().config({
+                style: { 'display':'flex', 'align-items':'center' },
+                child: new mofron.class.Component({
+                           style: { 
+			       'display':         'flex',
+			       'justify-content': 'center',
+			       'width':           '100%',
+			       'align-items':     'center'
+			   },
+                           child: [this.indexText(),this.indexArrow()[0],this.indexArrow()[1]]
+                       }),
+                event: [
+		    new Focus(new ConfArg(this.is_extend,this)),
+		    new Click(new ConfArg(this.indexClick,this))
+		]
 	    });
-            
-            /* init change event */
-            let cevt = (p1,p2,p3) => {
-                try {
-                    let chg_evt = p1.changeEvent();
-                    for (let cidx in chg_evt) {
-                        chg_evt[cidx][0](p1, p1.select(), chg_evt[cidx][1]);
-                    }
-                } catch (e) {
-                    console.error(e.stack);
-                    throw e;
-                }
-            }
-            this.event(new onCommon(cevt,"onchange"), { private:true });
+
+	    this.frame(Frame);
+            let conts_frm = new Frame({
+	                        style:   { 'position':'fixed', 'margin-top':'-0.01rem' },
+                                height:  null,
+	                        effect:  new FadePack(300),
+				borderWidth: new ConfArg('0.01rem','0.01rem','0rem','0.01rem'),
+                                visible: false
+                            });
+	    this.child([this.indexFrame(),conts_frm]);
+	    this.styleDom(this.childDom());
+	    this.childDom(conts_frm.childDom());
+            this.size('1.5rem','0.25rem');
         } catch (e) {
             console.error(e.stack);
             throw e;
         }
     }
-    
-    /**
-     * set select index
-     *
-     * @type private 
-     */
-    afterRender () {
+
+    indexClick (p1,p2,p3) {
         try {
-            super.afterRender();
-            
-            let chg_evt = this.changeEvent();
-	    for (let cidx in chg_evt) {
-                chg_evt[cidx][0](this, this.select(), chg_evt[cidx][1]);
+	    let set_extend = null;
+            if (true === p3.indexArrow()[0].visible()) {
+                p3.indexArrow()[0].visible(false,() => { p3.indexArrow()[1].visible(true); });
+                p3.childDom().component().visible(true);
+		set_extend = true;
+            } else {
+                p3.indexArrow()[1].visible(false,() => { p3.indexArrow()[0].visible(true); });
+		p3.childDom().component().visible(false);
+		set_extend = false;
             }
-        } catch (e) {
+	    setTimeout(
+	        (s1) => { s1.m_extend=set_extend; }, 50, p3
+            );
+	} catch (e) {
             console.error(e.stack);
             throw e;
         }
     }
-    
-    /**
-     * select text list setter/getter
-     *
-     * @param (mixed) string:  select text contents
-     *                array: select text contents list
-     *                undefined: call as getter
-     * @return (array) select text contents [string,..]
-     *                 null: not set
-     * @type parameter
-     */
-    text (prm, cnf) {
+
+    indexText (prm,cnf) {
         try {
-            if (undefined === prm) {
-                /* getter */
-		return (0 === this.child().length) ? this.child() : this.child().slice(1);
-	    }
-	    /* setter */
-            if (true === Array.isArray(prm)) {
-                for (let pidx in prm) {
-                    this.text(prm[pidx],cnf);
-                }
+            if ('string' == typeof prm) {
+                this.indexText().text(prm);
+                this.indexText().config(cnf);
                 return;
-	    }
-            let buf  = this.childDom();
-	    let odom = new mofron.class.Dom("option", this);
-            this.childDom().child(odom);
-            this.childDom(odom);
-	    if ("string" === typeof prm) {
-                prm = new Text(prm);
-	    }
-	    if (undefined !== cnf) {
-                prm.config(cnf);
-	    }
-            this.child(prm);
-            this.childDom(buf);
-        } catch (e) {
-            console.error(e.stack);
-            throw e;
-        }
-    }
-    
-    /**
-     * select index setter/getter
-     *
-     * @param (number) selected index
-     *                 undefined: call as getter
-     * @return (mixed) number: selected index
-     *                 null: not selected
-     * @type parameter
-     */
-    select (prm) {
-        try {
-            let opts = this.childDom().child();
-            if (undefined === prm) {
-	        /* getter */
-                if (false === this.isExists()) {
-                    return this.confmng("select");
-		} else {
-                    for (let oidx in opts) {
-                        if (true === opts[oidx].props("selected")) {
-                            return parseInt(oidx);
-                        }
-                    }
-		}
-                return null;
             }
-            /* setter */
-            if (false === this.isExists()) {
-                this.confmng("select", prm);
-	    } else {
-                if (undefined === opts[prm]) {
-                    throw new Error("invalid parameter");
-		}
-		opts[prm].props({ "selected" : true });
-	    }
-        } catch (e) {
+            return this.innerComp('indexText', prm, Text);
+	} catch (e) {
             console.error(e.stack);
             throw e;
         }
     }
-    
-    /**
-     * item value
-     *
-     * @param (number) the same as select parameter
-     * @return (mixed) the same as select parameter
-     * @type parameter
-     */
-    value (prm) {
+
+    indexArrow (prm) {
+        return this.confmng('indexArrow', prm);
+    }
+
+    indexFrame (prm) {
+        return this.innerComp('indexFrame', prm, Frame);
+    }
+
+    item (prm,cnf) {
         try {
-	    return this.select(prm);
+	    if (undefined === prm) {
+                return this.child();
+	    } else if ('string' === typeof prm) {
+                let dropd     = this;
+		let frame     = this.frame();
+                let itm_frame = new frame({});
+                if (null !== this.accentColor()) {
+                    itm_frame.event(new Hover((h1,h2) => {
+                        if (true === h2) {
+                            h1.baseColor(dropd.accentColor());
+                        } else {
+                            h1.baseColor(dropd.baseColor());
+                        }
+                    }));
+                }
+		itm_frame.effect({ 'modname':'Border', tag:'Frame' }).position('bottom');
+		itm_frame.config({
+		    width:'100%', height:'0.25rem',
+		    //baseColor:'white',
+		    style: {
+		        'display':         'flex',
+		        'justify-content': 'center',
+			'align-items':     'center'
+                    },
+		    event: new Click((c1) => {
+		               c1.id()
+			       let dd_chd  = dropd.child();
+			       let sel_idx = null;
+			       for (let didx in dd_chd) {
+                                   if (c1.id() === dd_chd[didx].id()) {
+                                       sel_idx = parseInt(didx);
+				       break;
+				   }
+			       }
+                               let sel_evt = dropd.selectEvent();
+                               for (let sidx in sel_evt) {
+                                   sel_evt[sidx][0](c1,sel_idx,sel_evt[sidx][1]);
+                               }
+                           })
+		});
+		itm_frame.child(
+                    new Text({ text:prm, size:'0.14rem', config:cnf })
+		);
+		this.child(itm_frame);
+                return;
+	    } else {
+	        prm.config(cnf);
+                this.child(prm);
+	    }
 	} catch (e) {
             console.error(e.stack);
             throw e;
         }
     }
     
-    /**
-     * clear item value
-     *
-     * @type function
-     */
-    clear () {
+    frame (prm) {
         try {
-	    this.select(0);
+            return this.confmng('frame',prm);
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+
+    width (prm,opt) {
+        try {
+            this.indexFrame().width(prm,opt);
+            return this.childDom().component().width(prm,opt);
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+    
+    height (prm,opt) {
+        try {
+            return this.indexFrame().height(prm,opt);
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+    
+    baseColor (prm,opt) {
+        try {
+            return this.childDom().component().baseColor(prm,opt);
+	} catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+    
+    mainColor (prm,opt) {
+        try {
+            return this.indexFrame().baseColor(prm,opt);
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+
+    accentColor (prm) {
+        try {
+            let ret = this.confmng('accentColor',prm);
+	    if (undefined === prm) {
+                return ret;
+	    }
+            /* setter */
+            let itm_lst = this.item();
+            for (let itm_idx in itm_lst) {
+                let dropd = this;
+                itm_lst[itm_idx].event(
+                    new Hover((h1,h2) => {
+                        if (true === h2) {
+                            h1.baseColor(dropd.accentColor());
+                        } else {
+                            h1.baseColor(dropd.baseColor());
+                        }
+                    })
+                );
+            }
+            return this.confmng('accentColor',prm);
+	} catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+
+    is_extend () {
+        try {
+            if (0 === arguments.length) {
+                /* getter */
+                return this.m_extend;
+            } else if (1 === arguments.length) {
+                /* setter */
+		if (this.is_extend() != arguments[0]) {
+                    this.indexClick(undefined,undefined,this);
+		}
+            } else if (3 === arguments.length) {
+                /* focus event */
+                let idx_fcs = arguments[1];
+                let dropd   = arguments[2];
+                if ((true === dropd.is_extend()) && (true === idx_fcs)) {
+                    dropd.is_extend(false);
+		} else if (false === idx_fcs) {
+                    dropd.is_extend(idx_fcs);
+		}
+            }
+	} catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+
+    selectEvent (fnc,prm) {
+        try {
+            return this.confmng(
+                       'selectEvent',
+                       (undefined === fnc) ? undefined : [fnc,prm]
+                   );
 	} catch (e) {
             console.error(e.stack);
             throw e;
