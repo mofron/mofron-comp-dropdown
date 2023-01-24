@@ -32,6 +32,7 @@ module.exports = class extends mofron.class.Component {
 	    this.confmng().add('frame',       { type:'function' });
             this.confmng().add('selectEvent', { type:'event', list:true });
             this.confmng().add('accentColor', { type:'color' });
+            this.confmng().add('mainColor',   { type:'color' });
             this.m_extend = false;
             
 	    if (0 < arguments.length) {
@@ -90,6 +91,9 @@ module.exports = class extends mofron.class.Component {
         try {
 	    let set_extend = null;
             if (true === p3.indexArrow()[0].visible()) {
+	        if ('no-drop' === p3.indexFrame().style('cursor')) {
+                    return;
+		}
                 p3.indexArrow()[0].visible(false,() => { p3.indexArrow()[1].visible(true); });
                 p3.childDom().component().visible(true);
 		set_extend = true;
@@ -225,7 +229,8 @@ module.exports = class extends mofron.class.Component {
     
     mainColor (prm,opt) {
         try {
-            return this.indexFrame().baseColor(prm,opt);
+            this.indexFrame().baseColor(prm,opt);
+	    return this.confmng('mainColor', prm);
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -295,6 +300,27 @@ module.exports = class extends mofron.class.Component {
             console.error(e.stack);
             throw e;
         }
+    }
+
+    disabled (prm) {
+        try {
+	    let opt = { forced:true };
+	    if (true === prm) {
+                this.indexFrame().baseColor([240,240,240]);
+		if (false === this.isExists()) {
+                    opt.lock = true;
+		}
+                this.indexFrame().style({ 'cursor': 'no-drop' },opt);
+	    } else {
+                this.indexFrame().baseColor(
+                    this.confmng('baseColor')
+		);
+		this.indexFrame().style({ 'cursor': 'pointer' },opt);
+	    }
+	} catch (e) {
+            console.error(e.stack);
+            throw e;
+	}
     }
 }
 /* end of file */
