@@ -189,6 +189,19 @@ module.exports = class extends mofron.class.Component {
             throw e;
         }
     }
+
+    itemEvent (idx, fnc, prm) {
+        try {
+            let itm = this.item()[idx];
+            if (undefined === itm) {
+                throw new Error('invalid parameter');
+            }
+            itm.event(new Click(new ConfArg(fnc,prm)));
+	} catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
     
     frame (prm) {
         try {
