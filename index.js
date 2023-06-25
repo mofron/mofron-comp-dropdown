@@ -26,7 +26,8 @@ module.exports = class extends mofron.class.Component {
         try {
             super();
             this.modname('dropdown');
-            
+            this.shortForm('indexText');
+
 	    /* init config */
             this.confmng().add('indexArrow',  { type:'array' });
 	    this.confmng().add('frame',       { type:'function' });
@@ -210,6 +211,18 @@ module.exports = class extends mofron.class.Component {
             console.error(e.stack);
             throw e;
         }
+    }
+
+    position (prm) {
+        try {
+	    if (undefined === prm) {
+                return this.childDom().style('position');
+	    }
+            this.childDom().style({ 'position': prm });
+	} catch (e) {
+            console.error(e.stack);
+            throw e;
+        } 
     }
 
     width (prm,opt) {
